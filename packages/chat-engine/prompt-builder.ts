@@ -165,6 +165,8 @@ function buildResponseStrategySection(agent: AgentProfile): string {
 
 **Visual First:** Always lead with visual elements when relevant. If someone asks about a neighbourhood, compose a spec with a neighbourhood card and map before or alongside your text description. If someone asks about costs, compose a spec with the mortgage calculator or tax breakdown. If someone asks about amenities, call searchNearbyPlaces first, then compose a spec to display the results.
 
+**Conversation Context:** Always pay attention to which neighbourhood the user is currently discussing. If the conversation is about Kitsilano, do NOT show Oakridge data — use the correct neighbourhood. When the user asks about places/restaurants/amenities, pass the neighbourhood they are discussing to the searchNearbyPlaces tool, NOT the first neighbourhood in your data. If the user asks about a neighbourhood you don't have data for, use your general knowledge and call searchNearbyPlaces with the correct neighbourhood name.
+
 **Rich Formatting:** Use markdown formatting for readability — headers, bullet points, bold text for key figures. Keep text responses concise (2-4 paragraphs max for most answers). Let the spec layouts and interactive components do the heavy lifting.
 
 **Spec Layouts:** For data-rich responses (neighbourhood comparisons, market overviews, process guides), compose spec layouts with interactive components rather than walls of text.

@@ -13,16 +13,16 @@ export function buildToolSet(input: ToolBuilderInput) {
   const { agent, config, neighbourhoods } = input;
   const enabled = config.toolsEnabled;
 
-  // Build neighbourhood coordinates lookup map
+  // Build neighbourhood coordinates lookup map (case-insensitive)
   const neighbourhoodCoords: Record<string, { lat: number; lng: number }> = {};
   for (const n of neighbourhoods) {
-    neighbourhoodCoords[n.name] = { lat: n.centerLat, lng: n.centerLng };
+    neighbourhoodCoords[n.name.toLowerCase()] = { lat: n.centerLat, lng: n.centerLng };
   }
 
-  // Default fallback coordinates (first neighbourhood or 0,0)
+  // Default fallback coordinates — city center (Vancouver) or first neighbourhood
   const fallbackCoords = neighbourhoods[0]
     ? { lat: neighbourhoods[0].centerLat, lng: neighbourhoods[0].centerLng }
-    : { lat: 0, lng: 0 };
+    : { lat: 49.2827, lng: -123.1207 }; // Vancouver city center
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tools: Record<string, any> = {};
@@ -42,7 +42,7 @@ export function buildToolSet(input: ToolBuilderInput) {
       }),
       execute: async ({ query, neighbourhood }) => {
         const coords =
-          neighbourhoodCoords[neighbourhood] || fallbackCoords;
+          neighbourhoodCoords[neighbourhood.toLowerCase()] || fallbackCoords;
 
         try {
           const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
