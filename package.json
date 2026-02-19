@@ -1,0 +1,23 @@
+{
+  "name": "nestiq",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "dev:platform": "turbo dev --filter=@nestiq/platform",
+    "dev:widget": "turbo dev --filter=@nestiq/widget",
+    "db:generate": "pnpm --filter @nestiq/db generate",
+    "db:migrate": "pnpm --filter @nestiq/db migrate",
+    "db:push": "pnpm --filter @nestiq/db push"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "pnpm@10.6.5",
+  "engines": {
+    "node": ">=20"
+  }
+}

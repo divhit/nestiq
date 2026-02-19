@@ -1,0 +1,39 @@
+{
+  "name": "@nestiq/platform",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.29",
+    "@ai-sdk/react": "^3.0.88",
+    "@clerk/nextjs": "^6.13.0",
+    "@json-render/core": "^0.6.1",
+    "@json-render/react": "^0.6.1",
+    "@nestiq/chat-engine": "workspace:*",
+    "@nestiq/chat-ui": "workspace:*",
+    "@nestiq/db": "workspace:*",
+    "@nestiq/shared": "workspace:*",
+    "@vercel/kv": "^3.0.0",
+    "ai": "^6.0.86",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

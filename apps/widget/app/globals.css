@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@source "../../../packages/chat-ui/**/*.tsx";
+
+@theme {
+  --color-warm-50: #faf8f6;
+  --color-warm-100: #f3efe9;
+  --color-warm-200: #e8e0d8;
+  --color-warm-300: #d6ccc0;
+  --color-warm-400: #b5a899;
+  --color-warm-500: #978a7b;
+  --color-warm-600: #7a6d5f;
+  --color-warm-700: #5d524a;
+  --color-warm-800: #433c37;
+  --color-warm-900: #2d2926;
+}
+
+:root {
+  --nestiq-primary: #0f766e;
+  --nestiq-primary-light: rgba(15, 118, 110, 0.1);
+  --nestiq-bg: #f5f0eb;
+  --nestiq-bg-dark: #e8e0d8;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
