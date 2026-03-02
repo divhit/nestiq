@@ -166,7 +166,7 @@ export function ChatPanel({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, sendMessage, status, stop } = useChat({
+  const { messages, sendMessage, status, stop, error } = useChat({
     id: key,
     transport: new DefaultChatTransport({ api: apiEndpoint }),
     messages: loadMessages(key),
@@ -455,6 +455,21 @@ export function ChatPanel({
                   }`}
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error display */}
+        {error && !isLoading && (
+          <div className="flex justify-start">
+            <div
+              className={`px-4 py-2.5 rounded-2xl rounded-bl-md text-sm ${
+                isDark
+                  ? "bg-red-500/20 text-red-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+              }`}
+            >
+              Something went wrong. Please try again.
             </div>
           </div>
         )}
