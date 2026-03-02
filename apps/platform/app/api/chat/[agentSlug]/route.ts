@@ -39,11 +39,11 @@ function getDemoContext(slug: string) {
     agent: {
       id: "demo-agent",
       slug,
-      firstName: "Demo",
-      lastName: "Agent",
-      email: "demo@nestiq.com",
-      phone: "555-000-0000",
-      brokerage: "NestIQ Demo",
+      firstName: "Aparna",
+      lastName: "Kapur",
+      email: "aparna@aparnakapur.com",
+      phone: "604-612-7694",
+      brokerage: "Oakwyn Realty Ltd.",
       city: "Vancouver",
       provinceState: "BC",
       country: "CA",
@@ -54,16 +54,16 @@ function getDemoContext(slug: string) {
     config: {
       id: "demo-config",
       agentId: "demo-agent",
-      llmModel: "gemini-2.0-flash",
+      llmModel: "gemini-2.5-flash",
       temperature: 0.5,
       personalityTemplate: "professional",
       firstMessage:
-        "Hi! How can I help with your real estate questions?",
+        "Hi! I'm here to help you explore Vancouver real estate. What brings you here today?",
       quickQuestions: [
-        "I'm looking to buy",
+        "I'm looking to buy in Vancouver",
         "Tell me about neighbourhoods",
+        "Compare neighbourhoods for me",
         "What can I afford?",
-        "I want to sell my home",
       ],
       toolsEnabled: {
         mortgageCalc: true,
@@ -79,7 +79,7 @@ function getDemoContext(slug: string) {
       currency: "CAD",
       taxCalculator: "bc_ptt",
       marketDataText:
-        "Metro Vancouver composite benchmark: $1,101,900 (-5.7% YoY). Market is in buyer-friendly territory.",
+        "Metro Vancouver composite benchmark: $1,101,900 (-5.7% YoY). Buyer-friendly market.\nVan West: Detached $2.96M (-12.2%), Townhouse $1.40M (-5.2%), Condo $777K (-4.3%).\nVan East: Detached $1.70M (-8.1%), Townhouse $1.04M (-7.9%), Condo $639K (-8.3%).",
     },
     neighbourhoods: [
       {
@@ -231,9 +231,15 @@ export async function POST(
     catalogPrompt: realestateCatalog.prompt({
       mode: "chat",
       customRules: [
-        "This renders inside a chat widget -- keep layouts compact but visually impressive.",
-        "Use 2-4 components per spec.",
-        "Prefer Cards with Metrics, Badges, and Progress bars.",
+        "Keep layouts SMALL -- max 3-4 components per spec.",
+        "VARY your component choices based on what the data is. Don't always use the same layout:",
+        "  - Single neighbourhood overview: Card with 2-3 Metrics + Badge",
+        "  - Comparing areas: Table or Grid with 2 Cards",
+        "  - Walk/transit scores: Progress bars",
+        "  - Buying/selling steps: Timeline",
+        "  - Market tips or buyer advice: Callout",
+        "  - FAQs or detailed breakdowns: Accordion",
+        "CRITICAL: Once you show a spec for a topic, NEVER show another spec for the same topic. Move forward with text only.",
         "NEVER use viewport height classes.",
       ],
     }),
@@ -245,7 +251,7 @@ export async function POST(
     neighbourhoods: context.neighbourhoods,
   });
 
-  const model = google(context.config.llmModel || "gemini-2.0-flash");
+  const model = google(context.config.llmModel || "gemini-2.5-flash");
 
   const result = streamText({
     model,
