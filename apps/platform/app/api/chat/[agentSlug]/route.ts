@@ -54,7 +54,7 @@ function getDemoContext(slug: string) {
     config: {
       id: "demo-config",
       agentId: "demo-agent",
-      llmModel: "gemini-2.5-flash",
+      llmModel: "gemini-3-flash-preview",
       temperature: 0.5,
       personalityTemplate: "professional",
       firstMessage:
@@ -251,7 +251,7 @@ export async function POST(
     neighbourhoods: context.neighbourhoods,
   });
 
-  const model = google(context.config.llmModel || "gemini-2.5-flash");
+  const model = google(context.config.llmModel || "gemini-3-flash-preview");
 
   const result = streamText({
     model,
