@@ -28,6 +28,10 @@ type ChatPanelProps = {
   className?: string;
   googleMapsApiKey?: string;
   hideHeader?: boolean;
+  /** Short label for the dark-variant header bar (e.g. "Ask me anything about Vancouver real estate") */
+  headerLabel?: string;
+  /** Placeholder text for the input field */
+  inputPlaceholder?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -84,7 +88,6 @@ function AssistantMessage({
   onLeadCapture?: (data: LeadCaptureData) => void;
 }) {
   const { spec, hasSpec } = useJsonRenderMessage(message.parts);
-  let specRendered = false;
 
   const bubbleClass =
     variant === "dark"
@@ -98,32 +101,38 @@ function AssistantMessage({
     onLeadCapture,
   };
 
+  // Separate parts: specs/tools render first (visuals), text renders last
+  const toolParts: { part: UIMessage["parts"][number]; index: number }[] = [];
+  const textParts: { part: UIMessage["parts"][number]; index: number }[] = [];
+  let specIndex = -1;
+
+  message.parts.forEach((part, i) => {
+    if (part.type === "text" && part.text) {
+      textParts.push({ part, index: i });
+    } else if (part.type === SPEC_DATA_PART_TYPE) {
+      if (specIndex === -1) specIndex = i;
+    } else {
+      toolParts.push({ part, index: i });
+    }
+  });
+
   return (
     <div className="flex justify-start">
       <div className="max-w-[95%] space-y-1">
-        {message.parts.map((part, i) => {
-          if (part.type === "text" && part.text) {
-            return (
-              <div key={i} className={bubbleClass}>
-                {part.text}
-              </div>
-            );
-          }
-          if (part.type === SPEC_DATA_PART_TYPE && hasSpec && !specRendered) {
-            specRendered = true;
-            return (
-              <div key={i} className="w-full my-1">
-                <ChatRenderer spec={spec} {...rendererProps} />
-              </div>
-            );
-          }
-          return renderPart(part, i);
-        })}
-        {hasSpec && !specRendered && (
-          <div className="w-full my-1">
+        {/* 1. Spec/widget visuals first */}
+        {hasSpec && (
+          <div key={specIndex >= 0 ? specIndex : "spec"} className="w-full my-1">
             <ChatRenderer spec={spec} {...rendererProps} />
           </div>
         )}
+        {/* 2. Tool results */}
+        {toolParts.map(({ part, index }) => renderPart(part, index))}
+        {/* 3. Text last — so the follow-up question is always at the bottom */}
+        {textParts.map(({ part, index }) => (
+          <div key={index} className={bubbleClass}>
+            {(part as { text: string }).text}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -149,6 +158,8 @@ export function ChatPanel({
   className = "",
   googleMapsApiKey,
   hideHeader = false,
+  headerLabel,
+  inputPlaceholder,
 }: ChatPanelProps) {
   const key = storageKey(agent.slug);
   const [input, setInput] = useState("");
@@ -207,8 +218,10 @@ export function ChatPanel({
   // ------------------------------------------------------------------
   const isDark = variant === "dark";
 
+  const wantFullHeight = className.includes("h-full");
+
   const containerClasses = isDark
-    ? `bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex flex-col overflow-hidden transition-all duration-500 ease-in-out ${hasMessages ? "h-[550px]" : "h-[340px]"}`
+    ? `bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex flex-col overflow-hidden ${wantFullHeight ? "h-full" : `transition-all duration-500 ease-in-out ${hasMessages ? "h-[550px]" : "h-[340px]"}`}`
     : "bg-white rounded-2xl shadow-2xl border border-warm-200 flex flex-col overflow-hidden h-full";
 
   const headerBorderClass = isDark
@@ -223,7 +236,7 @@ export function ChatPanel({
   // Render
   // ------------------------------------------------------------------
   return (
-    <div className={`${containerClasses} ${className}`}>
+    <div className={`${containerClasses} ${wantFullHeight ? className.replace("h-full", "").trim() : className}`}>
       {/* Header */}
       {!hideHeader && (
         <div
@@ -276,7 +289,7 @@ export function ChatPanel({
               <div className="flex-1 min-w-0">
                 {isDark ? (
                   <p className="text-sm font-medium text-white">
-                    {firstMessage || `Ask me anything about real estate`}
+                    {headerLabel || `Ask me anything about real estate`}
                   </p>
                 ) : (
                   <>
@@ -375,42 +388,50 @@ export function ChatPanel({
           </div>
         )}
 
-        {messages.map((message) => (
-          <div key={message.id}>
-            {message.role === "user" ? (
-              <div className="flex justify-end">
-                <div
-                  className={`max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-white text-sm leading-relaxed`}
-                  style={{
-                    backgroundColor: isDark
-                      ? "var(--nestiq-primary, #0d9488)"
-                      : "var(--nestiq-primary, #0f766e)",
-                  }}
-                >
-                  {message.parts
-                    .filter((p) => p.type === "text")
-                    .map((p, i) =>
-                      p.type === "text" ? (
-                        <span key={i}>{p.text}</span>
-                      ) : null
-                    )}
-                </div>
-              </div>
-            ) : (
-              <AssistantMessage
-                message={message}
-                renderPart={renderPart}
-                variant={variant}
-                agent={agent}
-                neighbourhoods={neighbourhoods}
-                googleMapsApiKey={googleMapsApiKey}
-                onLeadCapture={onLeadCapture}
-              />
-            )}
-          </div>
-        ))}
+        {messages.map((message, msgIdx) => {
+          // Hide the last assistant message while still loading — show dots instead
+          const isLastMessage = msgIdx === messages.length - 1;
+          if (isLastMessage && message.role === "assistant" && isLoading) {
+            return null;
+          }
 
-        {status === "submitted" && (
+          return (
+            <div key={message.id}>
+              {message.role === "user" ? (
+                <div className="flex justify-end">
+                  <div
+                    className={`max-w-[80%] px-4 py-2.5 rounded-2xl rounded-br-md text-white text-sm leading-relaxed`}
+                    style={{
+                      backgroundColor: isDark
+                        ? "var(--nestiq-primary, #0d9488)"
+                        : "var(--nestiq-primary, #0f766e)",
+                    }}
+                  >
+                    {message.parts
+                      .filter((p) => p.type === "text")
+                      .map((p, i) =>
+                        p.type === "text" ? (
+                          <span key={i}>{p.text}</span>
+                        ) : null
+                      )}
+                  </div>
+                </div>
+              ) : (
+                <AssistantMessage
+                  message={message}
+                  renderPart={renderPart}
+                  variant={variant}
+                  agent={agent}
+                  neighbourhoods={neighbourhoods}
+                  googleMapsApiKey={googleMapsApiKey}
+                  onLeadCapture={onLeadCapture}
+                />
+              )}
+            </div>
+          );
+        })}
+
+        {isLoading && (
           <div className="flex justify-start">
             <div
               className={`px-4 py-3 rounded-2xl rounded-bl-md ${
@@ -455,7 +476,7 @@ export function ChatPanel({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about real estate..."
+            placeholder={inputPlaceholder || "Ask about real estate..."}
             className={
               isDark
                 ? "flex-1 px-4 py-2.5 text-sm bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-white/30"
